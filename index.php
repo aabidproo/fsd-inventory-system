@@ -3,10 +3,10 @@ require_once 'auth/authenticate.php';
 require_once 'includes/db_connect.php';
 
 // Fetch stats
-$total_products = $conn->query("SELECT COUNT(*) as count FROM products")->fetch_assoc()['count'];
-$total_suppliers = $conn->query("SELECT COUNT(*) as count FROM suppliers")->fetch_assoc()['count'];
-$total_stock = $conn->query("SELECT SUM(stock) as sum FROM products")->fetch_assoc()['sum'] ?? 0;
-$low_stock_count = $conn->query("SELECT COUNT(*) as count FROM products WHERE stock <= low_stock_threshold")->fetch_assoc()['count'];
+$total_products = $conn->query("SELECT COUNT(*) as count FROM products")->fetch()['count'];
+$total_suppliers = $conn->query("SELECT COUNT(*) as count FROM suppliers")->fetch()['count'];
+$total_stock = $conn->query("SELECT SUM(stock) as sum FROM products")->fetch()['sum'] ?? 0;
+$low_stock_count = $conn->query("SELECT COUNT(*) as count FROM products WHERE stock <= low_stock_threshold")->fetch()['count'];
 ?>
 <?php include 'includes/header.php'; ?>
 

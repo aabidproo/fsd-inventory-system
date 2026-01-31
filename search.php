@@ -4,12 +4,52 @@ require_once 'includes/db_connect.php'; // Correct path from root
 include 'includes/header.php';
 ?>
 
+<style>
+    .autocomplete-wrapper {
+        position: relative;
+        width: 100%;
+    }
+    .autocomplete-dropdown {
+        position: absolute !important;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        z-index: 9999 !important;
+        background: #ffffff !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 4px !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+        display: none;
+        max-height: 250px;
+        overflow-y: auto;
+        margin-top: -15px; /* Pull it up over the input's bottom margin */
+    }
+    .suggestion-item {
+        padding: 12px 16px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: var(--text-main);
+        border-bottom: 1px solid #f1f5f9;
+        background: #fff;
+    }
+    .suggestion-item:hover {
+        background: #f8fafc !important;
+        color: var(--primary-color) !important;
+    }
+    .suggestion-item:last-child {
+        border-bottom: none;
+    }
+</style>
+
 <div class="search-section">
     <h2>Search Products</h2>
     <form method="GET" class="search-form-grid">
         <div class="filter-group">
             <label>Supplier Name</label>
-            <input type="text" name="supplier" placeholder="e.g. Supplier Name" value="<?= htmlspecialchars($_GET['supplier'] ?? '') ?>">
+            <div class="autocomplete-wrapper">
+                <input type="text" id="supplier-input" name="supplier" placeholder="e.g. Supplier Name" value="<?= htmlspecialchars($_GET['supplier'] ?? '') ?>" autocomplete="off">
+                <div id="autocomplete-suggestions" class="autocomplete-dropdown"></div>
+            </div>
         </div>
         <div class="filter-group">
             <label>Min Price</label>
@@ -35,32 +75,26 @@ include 'includes/header.php';
     <?php
     if ($_SERVER["REQUEST_METHOD"] == "GET" && !empty($_GET)) {
         $where = [];
-        $types = "";
         $params = [];
 
         if (!empty($_GET['supplier'])) {
             $where[] = "s.name LIKE ?";
-            $types .= "s";
             $params[] = "%" . $_GET['supplier'] . "%";
         }
         if (!empty($_GET['min_price'])) {
             $where[] = "p.price >= ?";
-            $types .= "d";
             $params[] = $_GET['min_price'];
         }
         if (!empty($_GET['max_price'])) {
             $where[] = "p.price <= ?";
-            $types .= "d";
             $params[] = $_GET['max_price'];
         }
         if (!empty($_GET['min_stock'])) {
             $where[] = "p.stock >= ?";
-            $types .= "i";
             $params[] = $_GET['min_stock'];
         }
         if (!empty($_GET['max_stock'])) {
             $where[] = "p.stock <= ?";
-            $types .= "i";
             $params[] = $_GET['max_stock'];
         }
 
@@ -69,14 +103,9 @@ include 'includes/header.php';
         $sql = "SELECT p.id, p.name, s.name AS supplier, p.price, p.stock 
                 FROM products p LEFT JOIN suppliers s ON p.supplier_id = s.id $where_clause";
 
-        if (!empty($params)) {
-             $stmt = $conn->prepare($sql);
-             $stmt->bind_param($types, ...$params);
-             $stmt->execute();
-             $result = $stmt->get_result();
-        } else {
-             $result = $conn->query($sql);
-        }
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($params);
+        $result = $stmt; // In PDO, $stmt is iterable or used for fetching
 
         echo "<h3>Results</h3>";
         echo "<table>
@@ -91,8 +120,8 @@ include 'includes/header.php';
                 </thead>
                 <tbody>";
         
-        if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
+        if ($result && $result->rowCount() > 0) {
+            while ($row = $result->fetch()) {
                 echo "<tr>
                         <td>" . htmlspecialchars($row["id"]) . "</td>
                         <td>" . htmlspecialchars($row["name"]) . "</td>
@@ -110,7 +139,7 @@ include 'includes/header.php';
     <p><a href="index.php">Back to Dashboard</a></p>
 </div>
 
+<script src="/inventory-system/assets/js/autocomplete_suppliers.js"></script>
 <?php 
-$conn->close(); 
 include 'includes/footer.php'; 
 ?>

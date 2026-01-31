@@ -6,11 +6,18 @@ $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 if ($id <= 0)
     die("Invalid supplier ID.");
 
-$supplier = $conn->query("SELECT * FROM suppliers WHERE id = $id")->fetch_assoc();
+$stmt = $conn->prepare("SELECT * FROM suppliers WHERE id = :id");
+$stmt->execute([':id' => $id]);
+$supplier = $stmt->fetch();
+
 if (!$supplier)
     die("Supplier not found.");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_once '../includes/functions.php';
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        handle_csrf_failure();
+    }
     $name = trim($_POST['name'] ?? '');
     $contact = trim($_POST['contact'] ?? '');
     $address = trim($_POST['address'] ?? '');
@@ -18,16 +25,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($name)) {
         $error = "Supplier name is required.";
     } else {
-        $stmt = $conn->prepare("UPDATE suppliers SET name = ?, contact = ?, address = ? WHERE id = ?");
-        $stmt->bind_param("sssi", $name, $contact, $address, $id);
-
-        if ($stmt->execute()) {
+        $stmt = $conn->prepare("UPDATE suppliers SET name = :name, contact = :contact, address = :address WHERE id = :id");
+        
+        if ($stmt->execute([
+            ':name'    => $name,
+            ':contact' => $contact,
+            ':address' => $address,
+            ':id'      => $id
+        ])) {
             header("Location: list.php?msg=Supplier+updated");
             exit;
         } else {
-            $error = "Database error: " . $stmt->error;
+            $error = "Database error: Could not update supplier.";
         }
-        $stmt->close();
+        $stmt = null;
     }
 }
 ?>
@@ -42,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php endif; ?>
 
 <form method="post">
+    <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
     <input type="hidden" name="id" value="<?= $id ?>">
 
     <label>Supplier Name <span style="color:#e74c3c;">*</span></label>

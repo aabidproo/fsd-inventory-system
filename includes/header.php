@@ -1,3 +1,10 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once __DIR__ . '/functions.php';
+$csrf_token = generate_csrf_token();
+?>
 <!DOCTYPE html>
 <html lang="en">
 

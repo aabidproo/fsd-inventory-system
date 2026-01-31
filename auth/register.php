@@ -13,6 +13,10 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_once '../includes/functions.php';
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        handle_csrf_failure();
+    }
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
@@ -25,28 +29,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Password must be at least 6 characters long.";
     } else {
         // Check if username already exists
-        $stmt = $conn->prepare("SELECT id FROM users WHERE username = ?");
-        $stmt->bind_param("s", $username);
-        $stmt->execute();
-        $stmt->store_result();
+        $stmt = $conn->prepare("SELECT id FROM users WHERE username = :username");
+        $stmt->execute([':username' => $username]);
         
-        if ($stmt->num_rows > 0) {
+        if ($stmt->fetch()) {
             $error = "Username already taken.";
         } else {
-            $stmt->close();
-            
             // Hash password and insert user
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
-            $stmt->bind_param("ss", $username, $hashed_password);
+            $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (:username, :password)");
             
-            if ($stmt->execute()) {
+            if ($stmt->execute([':username' => $username, ':password' => $hashed_password])) {
                 $success = "User account created successfully! You can manage them in the <a href='users.php'>user list</a>.";
             } else {
                 $error = "Failed to create user. Please try again.";
             }
         }
-        $stmt->close();
+        $stmt = null;
     }
 }
 ?>
@@ -70,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="post" class="login-form-direct">
+            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
             <div class="form-group">
                 <label>Username</label>
                 <input type="text" name="username" placeholder="Choose a username" required autofocus autocomplete="username" value="<?= htmlspecialchars($_POST['username'] ?? '') ?>">

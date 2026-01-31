@@ -5,6 +5,10 @@ require_once '../includes/db_connect.php';
 $error = '';  // Will store error message if any
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_once '../includes/functions.php';
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        handle_csrf_failure();
+    }
     $name    = trim($_POST['name'] ?? '');
     $contact = trim($_POST['contact'] ?? '');
     $address = trim($_POST['address'] ?? '');
@@ -12,17 +16,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($name)) {
         $error = "Supplier name is required.";
     } else {
-        $stmt = $conn->prepare("INSERT INTO suppliers (name, contact, address) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $name, $contact, $address);
-
-        if ($stmt->execute()) {
+        $stmt = $conn->prepare("INSERT INTO suppliers (name, contact, address) VALUES (:name, :contact, :address)");
+        
+        if ($stmt->execute([':name' => $name, ':contact' => $contact, ':address' => $address])) {
             // Success → redirect to list with success message
             header("Location: list.php?msg=Supplier+added+successfully");
             exit;
         } else {
-            $error = "Failed to add supplier: " . $stmt->error;
+            $error = "Failed to add supplier.";
         }
-        $stmt->close();
+        $stmt = null;
     }
     
     // If we reach here → there was an error, keep form values
@@ -41,11 +44,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <?php if (!empty($error)): ?>
     <div class="error-message">
-        <?= $error ?>
+        <?= htmlspecialchars($error) ?>
     </div>
 <?php endif; ?>
 
 <form method="post">
+    <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
     <label>Supplier Name <span style="color:#e74c3c;">*</span></label>
     <input type="text" 
            name="name" 
@@ -71,6 +75,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php include '../includes/footer.php'; ?>
 
 <?php
-// Optional: close connection (good practice, though PHP auto-closes at end)
-$conn->close();
+// Optional: nullify connection (good practice)
+$conn = null;
 ?>

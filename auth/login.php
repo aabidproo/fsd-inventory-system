@@ -11,6 +11,11 @@ $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once '../includes/db_connect.php';
+    require_once '../includes/functions.php';
+
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        handle_csrf_failure();
+    }
 
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
@@ -18,12 +23,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($username) || empty($password)) {
         $error = "Please fill in both fields.";
     } else {
-        $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = ?");
-        $stmt->bind_param("s", $username);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = :username");
+        $stmt->execute([':username' => $username]);
+        $user = $stmt->fetch();
         
-        if ($user = $result->fetch_assoc()) {
+        if ($user) {
             if (password_verify($password, $user['password'])) {
                 // Login successful
                 $_SESSION['user_id']    = $user['id'];
@@ -38,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $error = "Invalid username or password.";
         }
-        $stmt->close();
+        $stmt = null;
     }
 }
 ?>
@@ -56,6 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="post" class="login-form-direct">
+            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
             <div class="form-group">
                 <label>Username</label>
                 <input type="text" name="username" placeholder="Enter your username" required autofocus autocomplete="username">

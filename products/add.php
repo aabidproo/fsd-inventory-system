@@ -3,22 +3,25 @@ require_once '../auth/authenticate.php';
 require_once '../includes/db_connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_once '../includes/functions.php';
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        handle_csrf_failure();
+    }
     $name = trim($_POST['name']);
     $supplier_id = (int) $_POST['supplier_id'];
     $price = (float) $_POST['price'];
     $stock = (int) $_POST['stock'];
     $threshold = (int) $_POST['threshold'];
 
-    $stmt = $conn->prepare("INSERT INTO products (name, supplier_id, price, stock, low_stock_threshold) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("sidii", $name, $supplier_id, $price, $stock, $threshold);
-
-    if ($stmt->execute()) {
+    $stmt = $conn->prepare("INSERT INTO products (name, supplier_id, price, stock, low_stock_threshold) VALUES (:name, :supplier_id, :price, :stock, :threshold)");
+    
+    if ($stmt->execute([':name' => $name, ':supplier_id' => $supplier_id, ':price' => $price, ':stock' => $stock, ':threshold' => $threshold])) {
         header("Location: list.php?msg=Product+added");
         exit;
     } else {
-        $error = "Error: " . $stmt->error;
+        $error = "Error: Could not add product.";
     }
-    $stmt->close();
+    $stmt = null;
 }
 ?>
 <?php include '../includes/header.php'; ?>
@@ -26,10 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <h2>Add New Product</h2>
 
 <?php if (isset($error)): ?>
-    <div class="alert" style="background:#f9dede; border-left-color:#c0392b;"><?= $error ?></div>
+    <div class="alert" style="background:#f9dede; border-left-color:#c0392b;"><?= htmlspecialchars($error) ?></div>
 <?php endif; ?>
 
 <form method="post">
+    <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
     <label>Product Name</label>
     <input type="text" name="name" required autofocus>
 
@@ -38,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <option value="">— Select Supplier —</option>
         <?php
         $sup = $conn->query("SELECT id, name FROM suppliers ORDER BY name");
-        while ($s = $sup->fetch_assoc()) {
+        while ($s = $sup->fetch()) {
             echo "<option value='{$s['id']}'>" . htmlspecialchars($s['name']) . "</option>";
         }
         ?>

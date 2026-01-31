@@ -1,6 +1,6 @@
 <?php
 require_once '../auth/authenticate.php';
-include 'db_connect.php'; ?>
+require_once '../includes/db_connect.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -34,16 +34,16 @@ include 'db_connect.php'; ?>
         <?php
         $sql = "SELECT * FROM suppliers";
         $result = $conn->query($sql);
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
+        if ($result->rowCount() > 0) {
+            while ($row = $result->fetch()) {
                 echo "<tr>
                         <td>" . $row["id"] . "</td>
                         <td>" . $row["name"] . "</td>
                         <td>" . $row["contact"] . "</td>
                         <td>" . $row["address"] . "</td>
                         <td>
-                            <a href='edit_supplier.php?id=" . $row["id"] . "'>Edit</a> |
-                            <a href='delete_supplier.php?id=" . $row["id"] . "' onclick='return confirm(\"Are you sure?\");'>Delete</a>
+                            <a href='edit.php?id=" . $row["id"] . "'>Edit</a> |
+                            <a href='delete.php?id=" . $row["id"] . "' onclick='return confirm(\"Are you sure?\");'>Delete</a>
                         </td>
                       </tr>";
             }
@@ -52,8 +52,8 @@ include 'db_connect.php'; ?>
         }
         ?>
     </table>
-    <a href="index.php">Back</a>
+    <a href="../index.php">Back</a>
 </body>
 
 </html>
-<?php $conn->close(); ?>
+<?php $conn = null; ?>

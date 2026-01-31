@@ -5,25 +5,37 @@ require_once '../includes/db_connect.php';
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_once '../includes/functions.php';
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        handle_csrf_failure();
+    }
     $name = trim($_POST['name']);
     $supplier_id = (int) $_POST['supplier_id'];
     $price = (float) $_POST['price'];
     $stock = (int) $_POST['stock'];
     $threshold = (int) $_POST['threshold'];
 
-    $stmt = $conn->prepare("UPDATE products SET name=?, supplier_id=?, price=?, stock=?, low_stock_threshold=? WHERE id=?");
-    $stmt->bind_param("sidiii", $name, $supplier_id, $price, $stock, $threshold, $id);
-
-    if ($stmt->execute()) {
+    $stmt = $conn->prepare("UPDATE products SET name=:name, supplier_id=:supplier_id, price=:price, stock=:stock, low_stock_threshold=:threshold WHERE id=:id");
+    
+    if ($stmt->execute([
+        ':name' => $name,
+        ':supplier_id' => $supplier_id,
+        ':price' => $price,
+        ':stock' => $stock,
+        ':threshold' => $threshold,
+        ':id' => $id
+    ])) {
         header("Location: list.php?msg=Product+updated");
         exit;
     } else {
-        $error = "Error: " . $stmt->error;
+        $error = "Error: Could not update product.";
     }
-    $stmt->close();
+    $stmt = null;
 }
 
-$product = $conn->query("SELECT * FROM products WHERE id = $id")->fetch_assoc();
+$stmt = $conn->prepare("SELECT * FROM products WHERE id = :id");
+$stmt->execute([':id' => $id]);
+$product = $stmt->fetch();
 if (!$product)
     die("Product not found.");
 ?>
@@ -32,6 +44,7 @@ if (!$product)
 <h2>Edit Product</h2>
 
 <form method="post">
+    <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
     <input type="hidden" name="id" value="<?= $id ?>">
 
     <label>Product Name</label>
@@ -41,7 +54,7 @@ if (!$product)
     <select name="supplier_id" required>
         <?php
         $sup = $conn->query("SELECT id, name FROM suppliers ORDER BY name");
-        while ($s = $sup->fetch_assoc()) {
+        while ($s = $sup->fetch()) {
             $sel = ($s['id'] == $product['supplier_id']) ? 'selected' : '';
             echo "<option value='{$s['id']}' $sel>" . htmlspecialchars($s['name']) . "</option>";
         }

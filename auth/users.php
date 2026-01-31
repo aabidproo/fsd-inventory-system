@@ -37,7 +37,7 @@ $result = $conn->query("SELECT id, username FROM users ORDER BY id ASC");
         </tr>
     </thead>
     <tbody>
-        <?php while ($row = $result->fetch_assoc()): ?>
+        <?php while ($row = $result->fetch()): ?>
             <tr>
                 <td><?= $row['id'] ?></td>
                 <td>
@@ -49,7 +49,7 @@ $result = $conn->query("SELECT id, username FROM users ORDER BY id ASC");
                 <td><?= ($row['username'] === 'admin') ? 'Admin' : 'Employee' ?></td>
                 <td>
                     <?php if ($row['username'] !== 'admin'): ?>
-                        <a href="delete_user.php?id=<?= $row['id'] ?>" class="action delete" onclick="return confirm('Are you sure you want to delete this user? They will lose all access immediately.')">Delete</a>
+                        <a href="delete_user.php?id=<?= $row['id'] ?>&token=<?= $csrf_token ?>" class="action delete" onclick="return confirm('Are you sure you want to delete this user? They will lose all access immediately.')">Delete</a>
                     <?php else: ?>
                         <span style="color: var(--text-muted); font-size: 0.8rem; font-style: italic;">Protected</span>
                     <?php endif; ?>

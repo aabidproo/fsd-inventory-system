@@ -30,7 +30,7 @@ $result = $conn->query("
     ORDER BY name
 ");
 
-if ($result->num_rows > 0): ?>
+if ($result->rowCount() > 0): ?>
     <table>
         <thead>
             <tr>
@@ -42,7 +42,7 @@ if ($result->num_rows > 0): ?>
             </tr>
         </thead>
         <tbody>
-            <?php while ($row = $result->fetch_assoc()): ?>
+            <?php while ($row = $result->fetch()): ?>
                 <tr>
                     <td><?= $row['id'] ?></td>
                     <td><?= htmlspecialchars($row['name']) ?></td>
@@ -50,7 +50,7 @@ if ($result->num_rows > 0): ?>
                     <td><?= htmlspecialchars($row['address'] ?: '-') ?></td>
                     <td>
                         <a href="edit.php?id=<?= $row['id'] ?>" class="action">Edit</a> |
-                        <a href="delete.php?id=<?= $row['id'] ?>" class="action delete"
+                        <a href="delete.php?id=<?= $row['id'] ?>&token=<?= $csrf_token ?>" class="action delete"
                             onclick="return confirm('Delete this supplier? Products linked to it may become unlinked.')">
                             Delete
                         </a>

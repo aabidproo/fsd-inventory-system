@@ -21,8 +21,8 @@ echo '<table>
     </thead>
     <tbody>';
 
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
+if ($result->rowCount() > 0) {
+    while ($row = $result->fetch()) {
         $is_low = ($row['stock'] <= $row['low_stock_threshold']) ? ' class="low-stock"' : '';
         echo "<tr$is_low>";
         echo "<td>{$row['id']}</td>";
@@ -32,7 +32,7 @@ if ($result->num_rows > 0) {
         echo "<td>{$row['stock']}</td>";
         echo "<td>
             <a href='/inventory-system/products/edit.php?id={$row['id']}' class='action'>Edit</a> |
-            <a href='/inventory-system/products/delete.php?id={$row['id']}' class='action delete' onclick='return confirm(\"Delete this product?\")'>Delete</a>
+            <a href='/inventory-system/products/delete.php?id={$row['id']}&token={$csrf_token}' class='action delete' onclick='return confirm(\"Delete this product?\")'>Delete</a>
         </td>";
         echo "</tr>";
     }
@@ -42,5 +42,5 @@ if ($result->num_rows > 0) {
 
 echo '</tbody></table>';
 
-$conn->close();
+$conn = null;
 ?>

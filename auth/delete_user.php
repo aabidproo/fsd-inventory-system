@@ -8,16 +8,20 @@ if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
 }
 
 require_once '../includes/db_connect.php';
+require_once '../includes/functions.php';
 
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+$token = $_GET['token'] ?? '';
+
+if (!verify_csrf_token($token)) {
+    handle_csrf_failure();
+}
 
 if ($id > 0) {
     // Check if we are trying to delete the 'admin' user
-    $stmt = $conn->prepare("SELECT username FROM users WHERE id = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $user = $result->fetch_assoc();
+    $stmt = $conn->prepare("SELECT username FROM users WHERE id = :id");
+    $stmt->execute([':id' => $id]);
+    $user = $stmt->fetch();
 
     if ($user) {
         if ($user['username'] === 'admin') {
@@ -25,23 +29,21 @@ if ($id > 0) {
             exit;
         }
 
-        $delete_stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
-        $delete_stmt->bind_param("i", $id);
+        $delete_stmt = $conn->prepare("DELETE FROM users WHERE id = :id");
         
-        if ($delete_stmt->execute()) {
+        if ($delete_stmt->execute([':id' => $id])) {
             header("Location: users.php?msg=User+deleted+successfully.");
         } else {
             header("Location: users.php?error=Failed+to+delete+user.");
         }
-        $delete_stmt->close();
+        $delete_stmt = null;
     } else {
         header("Location: users.php?error=User+not+found.");
     }
-    $stmt->close();
+    $stmt = null;
 } else {
     header("Location: users.php");
 }
 
-$conn->close();
 exit;
 ?>
