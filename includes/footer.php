@@ -2,7 +2,7 @@
 
 <footer>
     <p>
-        College Final Project &bull; <?= date("Y") ?> &bull; Developed by Aabid Hasan
+        College Final Project of FSD &bull; <?= date("Y") ?> &bull; Developed by Aabid Hasan
     </p>
 </footer>
 </div> <!-- End .container -->
