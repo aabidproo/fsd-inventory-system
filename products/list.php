@@ -32,7 +32,7 @@ if ($alerts->rowCount() > 0): ?>
 
 <div id="products-table">
     <?php 
-    // Adjust path for the folder shift
+
     include '../ajax/get_products_table.php'; 
     ?>
 </div>

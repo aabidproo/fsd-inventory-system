@@ -1,7 +1,5 @@
 <?php
-/**
- * Generate a CSRF token and store it in the session.
- */
+
 function generate_csrf_token() {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
@@ -12,9 +10,6 @@ function generate_csrf_token() {
     return $_SESSION['csrf_token'];
 }
 
-/**
- * Verify a CSRF token against the session.
- */
 function verify_csrf_token($token) {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
@@ -25,9 +20,7 @@ function verify_csrf_token($token) {
     return hash_equals($_SESSION['csrf_token'], $token);
 }
 
-/**
- * Handle CSRF failure.
- */
+
 function handle_csrf_failure() {
     header("HTTP/1.1 403 Forbidden");
     die("Security Error: CSRF token validation failed. Please go back, refresh the page, and try again.");

@@ -8,7 +8,7 @@ require_once '../includes/db_connect.php'; ?>
     <meta charset="UTF-8">
     <title>Suppliers</title>
     <style>
-        /* Same as before */
+
         table {
             border-collapse: collapse;
         }

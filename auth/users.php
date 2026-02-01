@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// ONLY 'admin' (Super Admin) can access this page
+
 if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
     header("Location: ../index.php");
     exit;

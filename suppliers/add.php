@@ -2,7 +2,7 @@
 require_once '../auth/authenticate.php';
 require_once '../includes/db_connect.php';
 
-$error = '';  // Will store error message if any
+$error = '';  
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once '../includes/functions.php';
@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $conn->prepare("INSERT INTO suppliers (name, contact, address) VALUES (:name, :contact, :address)");
         
         if ($stmt->execute([':name' => $name, ':contact' => $contact, ':address' => $address])) {
-            // Success → redirect to list with success message
+            // Success 
             header("Location: list.php?msg=Supplier+added+successfully");
             exit;
         } else {
@@ -28,12 +28,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = null;
     }
     
-    // If we reach here → there was an error, keep form values
+
     $form_name    = htmlspecialchars($name ?? '');
     $form_contact = htmlspecialchars($contact ?? '');
     $form_address = htmlspecialchars($address ?? '');
 } else {
-    // Fresh form load
+
     $form_name = $form_contact = $form_address = '';
 }
 ?>
@@ -75,6 +75,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php include '../includes/footer.php'; ?>
 
 <?php
-// Optional: nullify connection (good practice)
+
 $conn = null;
 ?>

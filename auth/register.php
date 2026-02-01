@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// ONLY 'admin' (Super Admin) can create users
+
 if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
     header("Location: ../index.php");
     exit;
@@ -28,14 +28,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (strlen($password) < 6) {
         $error = "Password must be at least 6 characters long.";
     } else {
-        // Check if username already exists
+
         $stmt = $conn->prepare("SELECT id FROM users WHERE username = :username");
         $stmt->execute([':username' => $username]);
         
         if ($stmt->fetch()) {
             $error = "Username already taken.";
         } else {
-            // Hash password and insert user
+
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (:username, :password)");
             

@@ -5,7 +5,7 @@
         College Final Project of FSD &bull; <?= date("Y") ?> &bull; Developed by Aabid Hasan
     </p>
 </footer>
-</div> <!-- End .container -->
+</div> 
 
 <script src="/inventory-system/assets/js/live_update.js"></script>
 </body>

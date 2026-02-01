@@ -1,6 +1,6 @@
 <?php
 require_once 'auth/authenticate.php';
-require_once 'includes/db_connect.php'; // Correct path from root
+require_once 'includes/db_connect.php'; 
 include 'includes/header.php';
 ?>
 
@@ -22,7 +22,7 @@ include 'includes/header.php';
         display: none;
         max-height: 250px;
         overflow-y: auto;
-        margin-top: -15px; /* Pull it up over the input's bottom margin */
+        margin-top: -15px; 
     }
     .suggestion-item {
         padding: 12px 16px;
@@ -105,8 +105,7 @@ include 'includes/header.php';
 
         $stmt = $conn->prepare($sql);
         $stmt->execute($params);
-        $result = $stmt; // In PDO, $stmt is iterable or used for fetching
-
+        $result = $stmt; 
         echo "<h3>Results</h3>";
         echo "<table>
                 <thead>

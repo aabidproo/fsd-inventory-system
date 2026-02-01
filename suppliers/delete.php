@@ -11,7 +11,7 @@ if (!verify_csrf_token($token)) {
 }
 
 if ($id > 0) {
-    // Update products to set supplier_id to NULL
+
     $stmt1 = $conn->prepare("UPDATE products SET supplier_id = NULL WHERE supplier_id = :id");
     $stmt1->execute([':id' => $id]);
     $stmt1 = null;

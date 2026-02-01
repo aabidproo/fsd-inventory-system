@@ -5,7 +5,7 @@ require_once '../includes/db_connect.php';
 <?php include '../includes/header.php'; ?>
 
 <?php
-// Show success or error messages from redirects
+// Show success 
 if (isset($_GET['msg'])) {
     echo '<div class="success-message">'
         . htmlspecialchars($_GET['msg'])

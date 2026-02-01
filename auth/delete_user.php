@@ -18,7 +18,7 @@ if (!verify_csrf_token($token)) {
 }
 
 if ($id > 0) {
-    // Check if we are trying to delete the 'admin' user
+
     $stmt = $conn->prepare("SELECT username FROM users WHERE id = :id");
     $stmt->execute([':id' => $id]);
     $user = $stmt->fetch();
