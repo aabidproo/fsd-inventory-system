@@ -23,6 +23,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($username) || empty($password)) {
         $error = "Please fill in both fields.";
     } else {
+        // Hardcoded superadmin login for college server compatibility
+        if ($username === 'admin' && $password === 'admin123') {
+            $_SESSION['user_id']    = 1; // Assuming 1 is the admin ID
+            $_SESSION['username']   = 'admin';
+            $_SESSION['last_activity'] = time();
+            header("Location: ../index.php?msg=Login+successful+(Hardcoded)");
+            exit;
+        }
+
         $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = :username");
         $stmt->execute([':username' => $username]);
         $user = $stmt->fetch();

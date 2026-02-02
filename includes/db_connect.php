@@ -1,8 +1,8 @@
 <?php
 $host = "localhost";
-$user = "root";
-$pass = "";
-$dbname = "inventory_db";
+$user = "NP03CS4A240093";
+$pass = "RbvWPuYiOJ";
+$dbname = "NP03CS4A240093";
 
 try {
     $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);

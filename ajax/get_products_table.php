@@ -31,8 +31,8 @@ if ($result->rowCount() > 0) {
         echo "<td>" . number_format($row['price'], 2) . "</td>";
         echo "<td>{$row['stock']}</td>";
         echo "<td>
-            <a href='/inventory-system/products/edit.php?id={$row['id']}' class='action'>Edit</a> |
-            <a href='/inventory-system/products/delete.php?id={$row['id']}&token={$csrf_token}' class='action delete' onclick='return confirm(\"Delete this product?\")'>Delete</a>
+            <a href='../products/edit.php?id={$row['id']}' class='action'>Edit</a> |
+            <a href='../products/delete.php?id={$row['id']}&token={$csrf_token}' class='action delete' onclick='return confirm(\"Delete this product?\")'>Delete</a>
         </td>";
         echo "</tr>";
     }

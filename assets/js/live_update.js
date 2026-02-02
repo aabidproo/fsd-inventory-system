@@ -3,8 +3,7 @@ function refreshProductsTable() {
     const tableContainer = document.querySelector('#products-table');
     if (!tableContainer) return;
 
-    // Absolute path from server root
-    fetch('/inventory-system/ajax/get_products_table.php')
+    fetch(`${BASE_PATH}ajax/get_products_table.php`)
         .then(response => {
             if (!response.ok) {
                 console.error('Failed to fetch products table:', response.status);

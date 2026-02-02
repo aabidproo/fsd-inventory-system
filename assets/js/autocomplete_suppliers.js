@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch(`/inventory-system/ajax/search_suppliers.php?q=${encodeURIComponent(query)}`);
+            const response = await fetch(`${BASE_PATH}ajax/search_suppliers.php?q=${encodeURIComponent(query)}`);
             const suggestions = await response.json();
 
             if (suggestions.length > 0) {

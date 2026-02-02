@@ -138,7 +138,7 @@ include 'includes/header.php';
     <p><a href="index.php">Back to Dashboard</a></p>
 </div>
 
-<script src="/inventory-system/assets/js/autocomplete_suppliers.js"></script>
+<script src="assets/js/autocomplete_suppliers.js"></script>
 <?php 
 include 'includes/footer.php'; 
 ?>

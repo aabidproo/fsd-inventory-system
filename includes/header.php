@@ -4,6 +4,17 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require_once __DIR__ . '/functions.php';
 $csrf_token = generate_csrf_token();
+
+// Dynamically calculate the base path to handle subdirectories
+$current_path = $_SERVER['PHP_SELF'];
+$base_pos = strpos($current_path, '/inventory-system/');
+if ($base_pos !== false) {
+    $after_base = substr($current_path, $base_pos + strlen('/inventory-system/'));
+    $depth = substr_count($after_base, '/');
+    $path_prefix = str_repeat('../', $depth);
+} else {
+    $path_prefix = '';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -15,7 +26,8 @@ $csrf_token = generate_csrf_token();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/inventory-system/assets/css/style.css">
+    <link rel="stylesheet" href="<?= $path_prefix ?>assets/css/style.css">
+    <script>const BASE_PATH = '<?= $path_prefix ?>';</script>
 </head>
 
 <body>
@@ -29,19 +41,19 @@ $csrf_token = generate_csrf_token();
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <div class="user-info">
                         <span>Welcome, <strong><?= htmlspecialchars($_SESSION['username'] ?? 'User') ?></strong></span>
-                        <a href="/inventory-system/auth/logout.php" class="logout-btn">Logout</a>
+                        <a href="<?= $path_prefix ?>auth/logout.php" class="logout-btn">Logout</a>
                     </div>
                 <?php endif; ?>
             </div>
 
             <nav>
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="/inventory-system/index.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : '' ?>">Dashboard</a>
-                    <a href="/inventory-system/products/list.php" class="<?= (strpos($_SERVER['PHP_SELF'], 'products') !== false) ? 'active' : '' ?>">Products</a>
-                    <a href="/inventory-system/suppliers/list.php" class="<?= (strpos($_SERVER['PHP_SELF'], 'suppliers') !== false) ? 'active' : '' ?>">Suppliers</a>
-                    <a href="/inventory-system/search.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'search.php') ? 'active' : '' ?>">Search</a>
+                    <a href="<?= $path_prefix ?>index.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : '' ?>">Dashboard</a>
+                    <a href="<?= $path_prefix ?>products/list.php" class="<?= (strpos($_SERVER['PHP_SELF'], 'products') !== false) ? 'active' : '' ?>">Products</a>
+                    <a href="<?= $path_prefix ?>suppliers/list.php" class="<?= (strpos($_SERVER['PHP_SELF'], 'suppliers') !== false) ? 'active' : '' ?>">Suppliers</a>
+                    <a href="<?= $path_prefix ?>search.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'search.php') ? 'active' : '' ?>">Search</a>
                     <?php if ($_SESSION['username'] === 'admin'): ?>
-                        <a href="/inventory-system/auth/users.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'users.php' || basename($_SERVER['PHP_SELF']) == 'register.php') ? 'active' : '' ?>">Users</a>
+                        <a href="<?= $path_prefix ?>auth/users.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'users.php' || basename($_SERVER['PHP_SELF']) == 'register.php') ? 'active' : '' ?>">Users</a>
                     <?php endif; ?>
                 <?php endif; ?>
             </nav>

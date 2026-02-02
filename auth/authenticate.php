@@ -3,7 +3,7 @@ session_start();
 
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: /inventory-system/auth/login.php");
+    header("Location: ../auth/login.php");
     exit;
 }
 
